@@ -1,0 +1,7 @@
+{
+  "param_name": "work_mem",
+  "function_name": "psprintf",
+  "analysis": "<需要提供函数>\npvsnprintf\n\n<思考过程>\n1. 参数通过控制关键函数对数据库性能的影响：\n    - work_mem通过内存限制机制影响psprintf，进而产生数据库性能影响。\n    - 机制：work_mem用来设定单个操作使用内存的上限。在\"get_hash_memory_limit\"函数中，work_mem决定了内存限制，这可能影响psprintf的行为。psprintf用于格式化字符串，这需要动态内存。如果内存受限，可能导致psprintf不能顺利执行，资源使用效率降低。\n    - 数据库性能影响：过低的work_mem值可能使psprintf在执行过程中频繁申请和释放内存，增加CPU开销和内存管理复杂度，导致性能下降。过高的值会导致内存过度占用，影响系统整体资源分配。\n\n<火焰图采样分析与调优方向>\n2. 基于psprintf执行状态和相关函数片段给出work_mem优化建议：\n    - 如果涉及到pvsnprintf，请指出除了监控psprintf之外，还需要监控pvsnprintf。\n    - 根据psprintf和pvsnprintf的火焰图采样率，建议调整work_mem的方向。若psprintf和pvsnprintf出现频繁内存分配和释放，则建议适度升高work_mem以减少此类操作，降低系统的内存管理负载。如果内存使用超过合理范围，应考虑降低work_mem以避免资源浪费。",
+  "code_snippets": "get_hash_memory_limit(void)\n{\n\tdouble\t\tmem_limit;\n\n\t/* Do initial calculation in double arithmetic */\n\tmem_limit = (double) work_mem * hash_mem_multiplier * 1024.0;\n\n\t/* Clamp in case it doesn't fit in size_t */\n\tmem_limit = Min(mem_limit, (double) SIZE_MAX);\n\n\treturn (size_t) mem_limit;\n}extern char *psprintf(const char *fmt,...) pg_attribute_printf(1, 2);\nextern size_t pvsnprintf(char *buf, size_t len, const char *fmt, va_list args) pg_attribute_printf(3, 0);\n\n#endif\t\t\t\t\t\t\t/* FE_MEMUTILS_H */",
+  "timestamp": "2025-06-08T21:11:41.393144"
+}
