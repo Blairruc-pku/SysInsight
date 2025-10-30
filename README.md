@@ -40,21 +40,17 @@ conda activate sysinsight
 sudo pip install -r requirements.txt
 ```
 
-### Step 3: Install and Configure Additional Tools
+### Step 3: Apply API Configuration
+```
+echo "export OPENAI_API_KEY={api_key}" >> ~/.zshrc
+echo "export OPENAI_API_VERSION={api_version}" >> ~/.zshrc
+echo "export OPENAI_API_BASE={api_base}" >> ~/.zshrc
+echo "export OPENAI_API_TYPE={api_type}" >> ~/.zshrc
 
-SysInsight leverages Linux perf and other system utilities. Please ensure they are installed:
-```bash
-sudo apt-get update
-sudo apt-get install linux-tools-common linux-tools-generic linux-tools-`uname -r`
+source ~/.zshrc
 ```
 
-### Step 4: Install PostgreSQL
-```
-sudo apt-get update
-sudo apt-get install postgresql-14
-```
-
-### Step 5: run
+### Step 4: run
 ```
 ./run.sh
 ```
