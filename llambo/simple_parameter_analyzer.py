@@ -202,46 +202,45 @@ class SimpleParameterAnalyzer:
         return result
 
     def _init_prompt(self):
-        self.analysis_prompt = """你是一个专业的数据库性能优化专家。请分析以下MySQL参数是如何直接影响代码执行的：
+        self.analysis_prompt = """You are a professional database performance optimization expert. Please analyze how the following MySQL parameters directly affect code execution:
 
 
-需要分析的关键参数：
+Key parameters to analyze:
 {parameters}
 
-需要重点分析影响的关键函数：
+Key functions to focus on for impact analysis:
 {key_func}
 
-关键参数涉及的函数片段：
+Function snippets related to key parameters:
 {code_snippets}
 
 
 
-请按照以下格式进行分析，每个部分输出前必须输出我用<>号指定的标记：
+Please analyze according to the following format, and each section must output the mark I specified with <> before outputting:
 
-<需要提供函数>
-除了现在给出的函数片段，是否还需要给出其他函数的具体实现，如果有，则输出函数名
+<Functions to Provide>
+Whether other functions' specific implementations need to be provided besides the function snippets given now. If yes, output the function names.
 
-<思考过程>
-1. 参数通过控制关键函数对数据库性能的影响：
-    - {parameters} 通过 [机制] 影响 {key_func}，进而产生[数据库性能影响]
-    - 机制：简要描述 {parameters} 值的变化如何改变函数的行为
-    - 数据库性能影响：描述这种改变对数据库性能的具体影响
+<Thinking Process>
+1. How parameters affect database performance by controlling key functions:
+    - {parameters} affects {key_func} through [mechanism], thereby producing [database performance impact]
+    - Mechanism: Briefly describe how changes in {parameters} values change the function's behavior
+    - Database performance impact: Describe the specific impact of this change on database performance
 
-<火焰图采样分析与调优方向>
-2. 基于 {key_func}执行状态和相关函数片段给出{parameters} 优化建议：
-    - 如果涉及到[其他函数]，请指出除了监控{key_func}之外，是否还需要监控其他函数。
-    - 如何根据 {key_func}和[其他函数]的火焰图采样率，推荐{parameters}调整的方向（升高或降低）和依据
+<Flame Graph Sampling Analysis and Tuning Direction>
+2. Based on {key_func} execution status and related function snippets, provide optimization suggestions for {parameters}:
+    - If [other functions] are involved, please indicate whether other functions need to be monitored besides monitoring {key_func}.
+    - How to recommend the direction (increase or decrease) and basis for {parameters} adjustment based on the flame graph sampling rate of {key_func} and [other functions]
 
 
-要求只能根据给定的代码和参数分析，描述具体、精确，避免笼统的说法，帮助另外的agent精确理解如何根据{key_func}的执行表现，
-通过调节{parameters} 的设置，优化数据库的性能表现，请注意格式，不要有多余输出。不要用markdown格式"""
+Requirements: Only analyze based on the given code and parameters, describe specifically and precisely, avoid general statements, help other agents accurately understand how to optimize database performance by adjusting {parameters} settings based on {key_func}'s execution performance. Please pay attention to the format, do not have extra output. Do not use markdown format"""
 
     def _validate_response_format(self, response: str) -> Dict[str, bool]:
         """验证响应是否包含必需的格式部分"""
         required_sections = {
-            "需要提供函数": False,
-            "思考过程": False,
-            "火焰图采样分析与调优方向": False
+            "Functions to Provide": False,
+            "Thinking Process": False,
+            "Flame Graph Sampling Analysis and Tuning Direction": False
         }
         
         for section in required_sections.keys():
@@ -255,7 +254,7 @@ class SimpleParameterAnalyzer:
         functions = []
         
         # 查找建议监控函数部分
-        pattern = r"需要提供函数\s*(.*?)\s*思考过程"
+        pattern = r"Functions to Provide\s*(.*?)\s*Thinking Process"
         match = re.search(pattern, response, re.DOTALL)
         if match:
             content = match.group(1).strip()
@@ -313,7 +312,7 @@ class SimpleParameterAnalyzer:
                 response = openai.ChatCompletion.create(
                     model="gpt-4o",
                     messages=[
-                        {"role": "system", "content": "你是一个专业的数据库性能优化专家，请严格按照要求的格式进行分析。"},
+                        {"role": "system", "content": "You are a professional database performance optimization expert. Please strictly follow the required format for analysis."},
                         {"role": "user", "content": prompt}
                     ]
                 )
